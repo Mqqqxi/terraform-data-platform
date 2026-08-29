@@ -18,3 +18,18 @@ aws dynamodb create-table \
   --key-schema AttributeName=LockID,KeyType=HASH \
   --billing-mode PAY_PER_REQUEST \
   --region us-east-1
+
+
+
+
+
+  ## Pre-entrega 2: Ingesta Real-Time (Capa Bronze)
+
+### Prueba de Ingesta con AWS CLI
+Para inyectar registros en el Kinesis Data Stream evitando Hot Shards, se utiliza una PartitionKey dinámica. Comando utilizado:
+
+```bash
+aws kinesis put-record \
+  --stream-name dev-data-stream \
+  --partition-key $(uuidgen) \
+  --data $(echo '{"event_type": "test_ingesta", "value": 100}' | base64)
