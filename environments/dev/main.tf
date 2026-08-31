@@ -22,8 +22,14 @@ module "ingestion" {
 
   env_name      = "dev"
   
-  # Reemplazá esto por el ARN real de tu bucket creado en el TP1. 
-  # Si lo creaste con otro módulo, podés pasarlo como variable (ej: module.storage.bucket_arn)
+
   s3_bucket_arn = "arn:aws:s3:::maxi-terraform-state-dev-123" 
 }
 
+# Módulo de Procesamiento Real-Time con Flink
+module "processing" {
+  source = "../../modules/processing"
+
+  env_name   = "dev"
+  account_id = "978841975519"
+}
