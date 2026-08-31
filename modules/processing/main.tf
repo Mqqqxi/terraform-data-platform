@@ -36,19 +36,47 @@ resource "aws_kinesisanalyticsv2_application" "flink_processor" {
   }
 }
 
-# Rol de seguridad para la ejecución de Flink
+# Rol de seguridad extendido para la ejecución de Flink (Kinesis + Glue + S3)
 resource "aws_iam_role" "flink_execution_role" {
   name = "${var.env_name}-flink-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = { Service = "kinesisanalytics.amazonaws.com" }
+    }]
+  })
+}
+
+resource "aws_iam_role_policy" "flink_lakehouse_policy" {
+  name = "${var.env_name}-flink-lakehouse-policy"
+  role = aws_iam_role.flink_execution_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
     Statement = [
       {
-        Action = "sts:AssumeRole"
         Effect = "Allow"
-        Principal = {
-          Service = "kinesisanalytics.amazonaws.com"
-        }
+        Action = [
+          "glue:CreateTable",
+          "glue:GetTable",
+          "glue:UpdateTable",
+          "glue:GetDatabase",
+          "glue:GetDatabases"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:PutObject",
+          "s3:GetObject",
+          "s3:DeleteObject",
+          "s3:ListBucket"
+        ]
+        Resource = "*"
       }
     ]
   })

@@ -33,3 +33,10 @@ module "processing" {
   env_name   = "dev"
   account_id = "978841975519"
 }
+
+
+module "lakehouse" {
+  source     = "../../modules/lakehouse"
+  env_name   = "dev"
+  account_id = "978841975519"
+}

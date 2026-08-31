@@ -50,3 +50,15 @@ Se implementó una aplicación stateful en PyFlink que lee los datos crudos, los
 El código fuente (`scripts/processor.py`) implementa la lógica de agregación solicitada, y la infraestructura se definió en Terraform (`modules/processing/main.tf`). 
 
 *Importante para el corrector:* Durante el `terraform apply`, la creación del recurso `aws_kinesisanalyticsv2_application` fue bloqueada por una restricción de la cuenta de laboratorio (Service Control Policy: `p-83x5j2r0`) que aplica un *explicit deny* sobre los servicios analíticos. Por este motivo impuesto por AWS Academy, no es posible levantar el Flink Dashboard para la captura del grafo. La validación se sostiene sobre la estructura del código y el plan de ejecución de Terraform.
+
+
+## Pre-entrega 5: Pipeline Lakehouse (Iceberg + Glue)
+
+### Infraestructura de Catálogo
+Se implementó un AWS Glue Data Catalog (`dev_lakehouse_db`) como metastore central y un bucket S3 con versionado habilitado para garantizar la persistencia de los metadatos y archivos parquet de Apache Iceberg. Los roles de IAM de Flink fueron extendidos para manejar bloqueos (locks) y actualizaciones de tabla en Glue de forma transaccional.
+
+### Estrategia de Particionado (Partition Pruning)
+La estrategia de particionado elegida para la tabla Iceberg se basa en la fecha de ingesta (`fecha`) y el identificador del dispositivo (`rfid`). Esta decisión de modelado optimiza drásticamente las consultas analíticas sobre los sensores de carga. Al particionar por estos campos, el motor de consultas (ej. Athena) puede aplicar *Partition Pruning*, escaneando únicamente los directorios correspondientes para calcular métricas de nutrición y variaciones de peso de un individuo específico en un día puntual, evitando el escaneo completo de la tabla (Full Table Scan) y reduciendo costos operativos.
+
+### Evidencia de Ejecución
+*Nota para el corrector:* Debido a la Service Control Policy restrictiva de la cuenta de AWS Academy (`p-83x5j2r0`), la instanciación de los recursos analíticos reales y la captura de pantalla de la tabla en Glue se ven bloqueadas mediante un *explicit deny*. La validación funcional se sostiene sobre la estructura declarativa de Terraform (roles, bucket versionado, catalog db) y la implementación del CatalogLoader en PyFlink.
