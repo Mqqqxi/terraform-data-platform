@@ -1,8 +1,16 @@
 import os
-from pyflink.datastream import StreamExecutionEnvironment
-from pyflink.table import StreamTableEnvironment, EnvironmentSettings
+
+try:
+    from pyflink.datastream import StreamExecutionEnvironment  # type: ignore
+    from pyflink.table import EnvironmentSettings, StreamTableEnvironment  # type: ignore
+except ImportError:
+    StreamExecutionEnvironment = None
+    EnvironmentSettings = None
+    StreamTableEnvironment = None
 
 def main():
+    if StreamExecutionEnvironment is None or EnvironmentSettings is None or StreamTableEnvironment is None:
+        raise ImportError("PyFlink no está instalado o no está disponible en este entorno.")
     # 1. Configuración del Entorno y Checkpoints (Fundamental para Iceberg)
     env = StreamExecutionEnvironment.get_execution_environment()
     env.enable_checkpointing(60000) # Checkpoints cada 1 min para el commit de metadatos

@@ -40,3 +40,9 @@ module "lakehouse" {
   env_name   = "dev"
   account_id = "978841975519"
 }
+
+module "redshift" {
+  source     = "../../modules/redshift"
+  env_name   = "dev"
+  account_id = "978841975519"
+}
